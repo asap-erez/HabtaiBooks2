@@ -1,0 +1,29 @@
+{
+  "name": "perez-book",
+  "version": "1.0.0",
+  "description": "A simple book website with authentication",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "serve": "node serve.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run serve\"",
+    "build": "echo 'No build step required'",
+    "test": "node test-config.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
