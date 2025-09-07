@@ -21,6 +21,7 @@ This project is a simple book website with user authentication functionality.
 ### Installation
 
 1. Create a `.env` file in the root directory with the following variables:
+
    ```
    PORT=3000
    JWT_SECRET=your_secure_jwt_secret_key_here
@@ -30,15 +31,17 @@ This project is a simple book website with user authentication functionality.
    ```
 
 2. Install the required dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development servers:
+
    ```bash
    # Start API server
    npm run dev
-   
+
    # In a separate terminal, start the frontend server
    npm run serve
    ```
@@ -69,6 +72,7 @@ This project is a simple book website with user authentication functionality.
 1. Sign up or log in to [Vercel](https://vercel.com)
 2. Click "New Project" and import your GitHub repository
 3. Configure the project:
+
    - Framework Preset: Other
    - Root Directory: ./
    - Build Command: npm run build
@@ -76,6 +80,7 @@ This project is a simple book website with user authentication functionality.
    - Install Command: npm install
 
 4. Add Environment Variables:
+
    - `JWT_SECRET`: Generate a secure random string
    - `NODE_ENV`: production
    - `FRONTEND_URL`: Your Vercel deployment URL (e.g., https://perez-book.vercel.app)
