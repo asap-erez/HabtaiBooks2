@@ -176,6 +176,40 @@ app.post('/logout', (req, res) => {
   return res.status(200).json({ message: 'Logged out successfully' });
 });
 
+// Delete account endpoint (protected)
+app.delete('/account', authenticateToken, (req, res) => {
+  const { password } = req.body;
+  
+  if (!password) {
+    return res.status(400).json({ message: 'Password is required to delete account' });
+  }
+  
+  const userData = readUsers();
+  const userIndex = userData.users.findIndex(u => u.id === req.user.id);
+  
+  if (userIndex === -1) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  
+  const user = userData.users[userIndex];
+  
+  // Verify password before deletion
+  if (!verifyPassword(password, user.password)) {
+    return res.status(401).json({ message: 'Invalid password' });
+  }
+  
+  // Remove user from array
+  userData.users.splice(userIndex, 1);
+  
+  if (writeUsers(userData)) {
+    // Clear the authentication cookie
+    res.clearCookie('token');
+    return res.status(200).json({ message: 'Account deleted successfully' });
+  } else {
+    return res.status(500).json({ message: 'Failed to delete account' });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', environment: process.env.NODE_ENV });

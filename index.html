@@ -101,14 +101,59 @@
         window.location.href = 'loginp.html';
       }
       
-      // Add logout button to the page
+      // Add delete account functionality
+      async function deleteAccount() {
+        const password = prompt('Please enter your password to confirm account deletion:');
+        if (!password) {
+          return; // User cancelled
+        }
+        
+        const confirmDelete = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+        if (!confirmDelete) {
+          return;
+        }
+        
+        try {
+          const response = await fetch(`${API_URL}/account`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ password })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            alert('Account deleted successfully');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            window.location.href = 'loginp.html';
+          } else {
+            alert(data.message || 'Failed to delete account');
+          }
+        } catch (error) {
+          console.error('Delete account error:', error);
+          alert('An error occurred while deleting your account');
+        }
+      }
+      
+      // Add logout and delete account buttons to the page
       window.addEventListener('DOMContentLoaded', () => {
         const logoutBtn = document.createElement('button');
         logoutBtn.textContent = 'Logout';
         logoutBtn.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 8px 16px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;';
         logoutBtn.onclick = logout;
         document.body.appendChild(logoutBtn);
-      });
+        
+        const deleteBtn = document.createElement('button');
+         deleteBtn.textContent = 'Delete Account';
+         deleteBtn.style.cssText = 'position: fixed; top: 10px; right: 100px; z-index: 1000; padding: 8px 16px; background: #cc0000; color: white; border: none; border-radius: 4px; cursor: pointer;';
+         deleteBtn.onclick = deleteAccount;
+         document.body.appendChild(deleteBtn);
+       });
     </script>
     <script src="script.js"></script>
   </body>
