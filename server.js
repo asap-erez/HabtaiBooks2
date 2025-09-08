@@ -215,7 +215,13 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', environment: process.env.NODE_ENV });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+
+// Only start the server when running locally (node server.js)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+// Export the app for Vercel
+module.exports = app;
