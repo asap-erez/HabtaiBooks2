@@ -209,6 +209,65 @@ app.delete('/account', authenticateToken, (req, res) => {
     return res.status(500).json({ message: 'Failed to delete account' });
   }
 });
+// --- NEW: Supabase Reading Progress API ---
+const { createClient } = require('@supabase/supabase-js');
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Save/update reading progress
+app.post('/api/save-progress', async (req, res) => {
+  const { email, current_page } = req.body;
+
+  if (!email || current_page == null) {
+    return res.status(400).json({ message: 'Email and current_page are required' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('reading_progress')
+      .upsert({
+        email,
+        current_page,
+        updated_at: new Date().toISOString()
+      })
+      .select();
+
+    if (error) throw error;
+
+    return res.status(200).json({ message: 'Progress saved', data });
+  } catch (err) {
+    console.error('Error saving progress:', err);
+    return res.status(500).json({ message: 'Failed to save progress' });
+  }
+});
+
+// Get reading progress for a specific user
+app.get('/api/get-progress/:email', async (req, res) => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('reading_progress')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no row found
+
+    return res.status(200).json({ data: data || { current_page: 1 } });
+  } catch (err) {
+    console.error('Error fetching progress:', err);
+    return res.status(500).json({ message: 'Failed to fetch progress' });
+  }
+});
+// --- END NEW ---
 
 // Health check endpoint
 app.get('/health', (req, res) => {
