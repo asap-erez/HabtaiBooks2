@@ -5,6 +5,10 @@
   // Default values for local development
   window.API_URL = 'http://localhost:3000';
   window.FRONTEND_URL = 'http://localhost:8000';
+
+  window.SUPABASE_URL
+  window.SUPABASE_ANON_KEY
+
   
   // Check if we're in a production environment (Vercel)
   if (window.location.hostname !== 'localhost') {
