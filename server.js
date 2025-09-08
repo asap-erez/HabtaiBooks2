@@ -29,6 +29,8 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Path to users data file
 const usersFilePath = path.join(__dirname, 'users.json');
 
