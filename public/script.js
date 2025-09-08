@@ -1,3 +1,13 @@
+// --- Supabase client (NEW) ---
+import { createClient } from '@supabase/supabase-js';
+
+// these can come from your env-config.js or be hardcoded for now
+const SUPABASE_URL = window.SUPABASE_URL; 
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- end new ---
+
 // Book navigation system
 let currentPage = parseInt(localStorage.getItem('bookCurrentPage')) || 1;
 const totalPages = 5;
@@ -45,13 +55,14 @@ const pages = {
         <h2>CHAPTER - Numero Uno, Senor Alfredo!</h2>
         <p><em>(maybe watching <a href="telemundo.jpg">Telemundo</a> wasn’t so useless after all)</em></p>
         <br>
-        <p>So I wrote this down cause you know my shii (My memory is as good as my eyesight sometimes)</p>
-        <p>Anyways I didn’t intend to make it a list but lemme jazz you about my first cool people I’ve ever met in my life. To me everyone is cool in their way but in the way that I look at the world, these were the first people in the different categories/ or moments </p>
+        <p>So I wrote this down cause you know my shii (My memory is as good as my eyesight sometimes.....half shit/half shit)</p>
+        <p>Anyways I didn’t intend to make it a list but lemme jazz you about the first cool people that I’ve ever met/seen in my life. To me everyone is cool in their way but in the way that I look at the world, these were the first people in the different categories/ or moments </p>
         <br
         <p><em>The First cool teacher ~ Alfred </em></p>
         <p>He may have been autistic but he was cool.</p>
-        <p>So Alfred was a new teacher as we joined p6(actually I’m not entirely sure about how  Alfred appeared to be in life) I think he was background character that just became a side character somehow…
-        <br>(Side joke/self burn- I can never be a mysterious character cause why I’m this talkative) <Dino Standup meme><br>Back to Alfred… The man didn’t just hate noise but he specifically hated and dreaded but was mostly disturbed by stupid noise. What is stupid Noise? Forexample: 1. People who walk pulling their shoes… And the girls had these crafts(shoes) ~ “you are Ugandan enough to know these” that made ears bleed. i actually think these wear like prototypes for a loud music instrument cause they really didnt play at how loud they were at times. So one day he called all those girls aside got their shoes and throw them off the second floor (I feel like the first floor is the first one down you use to enter so that would make this the third floor). Thing is the window was close to the fence next to the main road so then he told them to go pick them up bare feet. The road was actually murram and full of sharp gravel that could actually cut your feet.</p>
+        <p>So Alfred was a new teacher as we joined p6. Actually I’m not entirely sure about how  Alfred appeared to be in life...he literallyjust spawned like a pregnancy from high school sex. <br> You just made a face of you look like you've never had a pregnancy scare, Neither have I cause i make great come backs like Kim kardashian.(Greatest improv joke on The Office) <br> I think Alfred...Alfredo was background character that just became a side character somehow. Teachers switching from background to side characters in life, damn!. Atleast you had one too. If you didnt, that says a lot about you, in whatever way you take that statement.</p>
+        <p><br>(Side joke/self burn- I can never be a mysterious character cause why I’m this talkative) <Dino Standup meme><br></p>
+        <p>Back to Alfred… The man didn’t just hate noise but he specifically hated and dreaded but was mostly disturbed by stupid noise. What is stupid Noise? Forexample: 1. People who walk pulling their shoes… And the girls had these crafts(shoes) ~ “you are Ugandan enough to know these” that made ears bleed. i actually think these wear like prototypes for a loud music instrument cause they really didnt play at how loud they were at times. So one day he called all those girls aside got their shoes and throw them off the second floor (I feel like the first floor is the first one down you use to enter so that would make this the third floor). Thing is the window was close to the fence next to the main road so then he told them to go pick them up bare feet. The road was actually murram and full of sharp gravel that could actually cut your feet.</p>
         <p>Brutal! I know but they lowkey(I feel so gen z for using lowkey in book) deserved it. Yes I know I don’t have to take sides but cmon! I enjoyed the faces they had on when they entered class. 
         <br>So from then everyone was walking very Immaculate and stupendous …..(I’m letting the laughs quiet down from Kissa on table 9)</p>
 <br>
@@ -125,9 +136,19 @@ function updatePageContent() {
         // Show/hide appropriate controls based on page
         updateControlsVisibility();
     }, 400);
+// Save current page to localStorage
+localStorage.setItem('bookCurrentPage', currentPage);
 
-    // Save current page to localStorage
-    localStorage.setItem('bookCurrentPage', currentPage);
+// --- NEW: also save progress to Supabase ---
+if (window.isLoggedIn && window.userEmail) {
+  supabase.from('reading_progress').upsert({
+    email: window.userEmail,
+    current_page: currentPage,
+    updated_at: new Date().toISOString()
+  });
+}
+// --- end new ---
+
 }
 
 // Update page number display
