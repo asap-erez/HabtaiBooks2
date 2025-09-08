@@ -8,6 +8,13 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -85,66 +92,78 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Register endpoint
-app.post('/register', (req, res) => {
+// REGISTER with Supabase
+app.post('/register', async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
-  
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-  
-  const userData = readUsers();
-  
-  // Check if user already exists
-  if (userData.users.some(user => user.email === email)) {
-    return res.status(409).json({ message: 'User already exists with this email' });
-  }
-  
-  // Create new user
-  const newUser = {
-    id: Date.now().toString(),
-    firstName: firstName || '',
-    lastName: lastName || '',
-    email,
-    password: hashPassword(password),
-    createdAt: new Date().toISOString()
-  };
-  
-  userData.users.push(newUser);
-  
-  if (writeUsers(userData)) {
-    // Don't send password back
-    const { password, ...userWithoutPassword } = newUser;
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{ first_name: firstName || '', last_name: lastName || '', email, password }])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    const token = jwt.sign({ id: data.id, email: data.email }, JWT_SECRET, { expiresIn: '24h' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'strict'
+    });
+
+    const { password: _, ...userWithoutPassword } = data;
     return res.status(201).json({ message: 'User registered successfully', user: userWithoutPassword });
-  } else {
-    return res.status(500).json({ message: 'Failed to register user' });
+  } catch (err) {
+    console.error('Register error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Login endpoint
-app.post('/login', (req, res) => {
+// LOGIN with Supabase
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-  
-  const userData = readUsers();
-  const user = userData.users.find(u => u.email === email && verifyPassword(password, u.password));
-  
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid email or password' });
+
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error || !user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    if (user.password !== password) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'strict'
+    });
+
+    const { password: _, ...userWithoutPassword } = user;
+    return res.status(200).json({ message: 'Login successful', user: userWithoutPassword });
+  } catch (err) {
+    console.error('Login error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
-  
-  // Create JWT token
-  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
-  
-  // Set token in cookie
-  res.cookie('token', token, {
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'strict'
-  });
+});
+
   
   // Don't send password back
   const { password: _, ...userWithoutPassword } = user;
